@@ -68,13 +68,13 @@ func main() {
 
 	text := string(bytes)
 
-	var fp func (s string) WordCountMap
+	var fp func(s string) WordCountMap
 
 	switch os.Args[1] {
-		case "naive":
-			fp = WordCountNaive
-		default:
-			fp = WordCountWithStringFields
+	case "naive":
+		fp = WordCountNaive
+	default:
+		fp = WordCountWithStringFields
 	}
 
 	for i := 0; i < 1000; i++ {
