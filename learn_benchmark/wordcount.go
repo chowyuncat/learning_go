@@ -62,8 +62,8 @@ func WordCountAllocEachStringOnlyOnce(s string) WordCountMap {
 	var c rune
 	for i, c = range s {
 		if unicode.IsSpace(c) { // strings.Fields implementation calls unicode.IsSpace
-			if last_space_idx + 1 != i {
-				word := s[last_space_idx + 1:i]
+			if last_space_idx+1 != i {
+				word := s[last_space_idx+1 : i]
 				// fmt.Printf("[%d:%d] => \"%s\"\n", last_space_idx + 1, i, word)
 				wc[word]++
 			}
@@ -73,9 +73,8 @@ func WordCountAllocEachStringOnlyOnce(s string) WordCountMap {
 		}
 	}
 
-
-	if last_space_idx != i + 1 {
-		word := s[last_space_idx + 1:i + 1]
+	if last_space_idx != i+1 {
+		word := s[last_space_idx+1 : i+1]
 		wc[word] += 1
 	}
 
