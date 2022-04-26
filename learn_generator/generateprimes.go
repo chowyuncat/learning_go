@@ -34,7 +34,7 @@ func MakeGeneratorChannel() chan int {
 	return primes
 }
 
-func MakeGeneratorTraditional() func() int {
+func MakeGeneratorClosure() func() int {
 
 	candidate := 0
 
@@ -94,7 +94,7 @@ func main() {
 	}
 
 	if true {
-		getprime := MakeGeneratorTraditional()
+		getprime := MakeGeneratorClosure()
 		for i := 0; i < N; i++ {
 			loops++
 			prime := getprime()
