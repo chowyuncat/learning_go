@@ -12,7 +12,6 @@ func MakeGeneratorChannel() chan int {
 
 	go func() {
 
-		primes <- 1
 		primes <- 2
 
 		for candidate := 3; true; candidate++ {
@@ -36,7 +35,7 @@ func MakeGeneratorChannel() chan int {
 
 func MakeGeneratorClosure() func() int {
 
-	candidate := 0
+	candidate := 1
 
 	getprime := func() int {
 
