@@ -63,6 +63,35 @@ func MakeGeneratorClosure() func() int {
 	return getprime
 }
 
+func DoChannel(N int) int {
+	primes := MakeGeneratorChannel()
+
+	var sum int
+
+	i := 0
+	for prime := range primes {
+		sum += prime
+		i++
+		if i >= N {
+			break
+		}
+	}
+
+	return sum
+}
+
+func DoClosure(N int) int {
+	var sum int
+
+	getprime := MakeGeneratorClosure()
+	for i := 0; i < N; i++ {
+		prime := getprime()
+		sum += prime
+	}
+
+	return sum
+}
+
 func main() {
 	N, err := strconv.Atoi(os.Args[1])
 	if err != nil {
@@ -70,35 +99,25 @@ func main() {
 		os.Exit(1)
 	}
 
-	var sum int
-
 	// runtime.GOMAXPROCS(1)
 	fmt.Printf("Limited to %d cpus\n", runtime.GOMAXPROCS(0))
 
-	loops := 0
+	var sum int
 
-	if false {
-		primes := MakeGeneratorChannel()
-
-		i := 0
-		for prime := range primes {
-			loops++
-			sum += prime
-			i++
-			if i >= N {
-				break
-			}
+	switch os.Args[2] {
+		case "channel": {
+			sum = DoChannel(N)
+			break
 		}
+
+		case "closure": {
+			sum = DoClosure(N)
+			break
+		}
+
+		default:
+			panic(fmt.Sprintf("unknown implementation %s", os.Args[2]))
 	}
 
-	if true {
-		getprime := MakeGeneratorClosure()
-		for i := 0; i < N; i++ {
-			loops++
-			prime := getprime()
-			sum += prime
-		}
-	}
-
-	fmt.Printf("sum=%d, loops=%d\n", sum, loops)
+	fmt.Printf("sum=%d\n", sum)
 }
