@@ -8,8 +8,14 @@ import (
 
 type apiHandler struct{}
 
-func (apiHandler) ServeHTTP(http.ResponseWriter, *http.Request) {
+func (apiHandler) ServeHTTP(_ http.ResponseWriter, r *http.Request) {
+	username, password, ok := r.BasicAuth()
+	fmt.Printf("BasicAuth: ok=%v, username=%s, password=%s\n", ok, username, password)
+
 	fmt.Println("/api")
+
+	fmt.Println("Shutting down server")
+	os.Exit(0)
 }
 
 func main() {
