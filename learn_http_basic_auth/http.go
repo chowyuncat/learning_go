@@ -1,21 +1,41 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"os"
 )
 
-type apiHandler struct{}
+const EXPECTED_USERNAME = "myusername"
+const EXPECTED_PASSWORD = "mypassword"
 
-func (apiHandler) ServeHTTP(_ http.ResponseWriter, r *http.Request) {
+var shutdown chan any = make(chan any)
+
+type apiHandler struct{} // state could be held here
+
+func (apiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	defer func() {
+		fmt.Println("Shutting down server")
+		shutdown <- struct{}{}
+	}()
+
 	username, password, ok := r.BasicAuth()
 	fmt.Printf("BasicAuth: ok=%v, username=%s, password=%s\n", ok, username, password)
 
-	fmt.Println("/api")
+	if !ok {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
 
-	fmt.Println("Shutting down server")
-	os.Exit(0)
+	if username != EXPECTED_USERNAME || password != EXPECTED_PASSWORD {
+		w.WriteHeader(http.StatusUnauthorized)
+		w.Write([]byte("\n"))
+		fmt.Printf("Bad username or password\n")
+		return
+	}
+
+	w.Write([]byte("Here is /api\n"))
 }
 
 func main() {
@@ -26,13 +46,25 @@ func main() {
 
 	// return 404 for everything else
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path != "/" {
-			http.NotFound(w, r)
-			return
-		}
+		defer func() {
+			fmt.Println("Shutting down server")
+			shutdown <- struct{}{}
+		}()
 
-		fmt.Println("/ is the home page")
+		http.NotFound(w, r)
+		return
 	})
 
-	http.ListenAndServe(addr, mux)
+	srv := &http.Server{
+		Addr:    addr,
+		Handler: mux,
+	}
+
+	go func() {
+		err := srv.ListenAndServe()
+		fmt.Printf("server returned %v\n", err)
+	}()
+
+	<-shutdown
+	srv.Shutdown(context.Background())
 }
